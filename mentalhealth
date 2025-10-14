@@ -1,1 +1,344 @@
-npx expo install expo
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PositivePathways — Mental Wellbeing</title>
+  <meta name="description" content="PositivePathways — gentle exercises, mood tracking, and guided reflections to help you build a calmer mind." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg-1: #f3fbff;    /* pale sky */
+      --bg-2: #eef7f4;    /* minty */
+      --accent: #6aa7a3;  /* calming teal */
+      --accent-2: #8fb6d6;/* soft blue */
+      --muted: #6b7276;
+      --glass: rgba(255,255,255,0.65);
+      --radius: 16px;
+      --shadow: 0 8px 30px rgba(15,20,25,0.08);
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      background: linear-gradient(180deg, var(--bg-1) 0%, var(--bg-2) 100%);
+      color:#0f1720;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    /* Container */
+    .wrap{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:48px 24px;
+      position:relative;
+      overflow:hidden;
+    }
+
+    /* soft swirl SVG sits behind */
+    .background-svg{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      pointer-events:none;
+      z-index:0;
+      opacity:0.55;
+      transform:scale(1.05);
+    }
+
+    /* Main card */
+    .card{
+      position:relative;
+      z-index:2;
+      max-width:1100px;
+      width:100%;
+      display:grid;
+      grid-template-columns: 1fr 420px;
+      gap:28px;
+      align-items:center;
+      padding:36px;
+      border-radius: calc(var(--radius) + 4px);
+      background: linear-gradient(135deg, rgba(255,255,255,0.7), rgba(255,255,255,0.55));
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px) saturate(120%);
+      border: 1px solid rgba(255,255,255,0.6);
+    }
+
+    /* Responsive */
+    @media (max-width:980px){
+      .card{ grid-template-columns: 1fr; padding:24px; gap:18px; }
+    }
+
+    /* Brand */
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      margin-bottom:6px;
+    }
+    .logo{
+      width:64px;
+      height:64px;
+      display:inline-grid;
+      place-items:center;
+      border-radius:14px;
+      background: linear-gradient(135deg,var(--accent),var(--accent-2));
+      color:white;
+      font-weight:700;
+      box-shadow: 0 6px 18px rgba(106,167,163,0.25);
+      flex:0 0 64px;
+    }
+    .brand h1{
+      font-size:22px;
+      margin:0;
+      letter-spacing:0.2px;
+    }
+    .brand p{
+      margin:0;
+      color:var(--muted);
+      font-size:13px;
+    }
+
+    /* Headline & text */
+    .lead{
+      font-size:28px;
+      line-height:1.12;
+      margin:6px 0 14px;
+      color:#07303a;
+      font-weight:700;
+    }
+    .sub{
+      color:var(--muted);
+      font-size:15px;
+      margin-bottom:20px;
+      max-width:52ch;
+    }
+
+    /* Actions */
+    .actions{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .btn{
+      padding:12px 18px;
+      border-radius:12px;
+      border:0;
+      font-weight:600;
+      cursor:pointer;
+      font-size:15px;
+      box-shadow:none;
+      transition:transform .14s ease, box-shadow .14s ease;
+    }
+    .btn-primary{
+      background: linear-gradient(90deg,var(--accent), var(--accent-2));
+      color:white;
+      box-shadow: 0 8px 20px rgba(107,167,164,0.18);
+    }
+    .btn-ghost{
+      background:transparent;
+      color:var(--accent);
+      border:1px solid rgba(107,167,164,0.14);
+    }
+    .btn:active{ transform:translateY(1px); }
+
+    /* Right column - card panel */
+    .panel{
+      background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.45));
+      padding:18px;
+      border-radius:12px;
+      border:1px solid rgba(0,0,0,0.03);
+      box-shadow: 0 6px 18px rgba(12,24,30,0.04);
+    }
+    .feature{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      margin-bottom:14px;
+    }
+    .feature:last-child{ margin-bottom:0; }
+    .icon{
+      width:44px;
+      height:44px;
+      display:grid;
+      place-items:center;
+      border-radius:10px;
+      background:rgba(138,190,188,0.12);
+      color:var(--accent);
+      font-weight:700;
+      flex:0 0 44px;
+      font-size:18px;
+    }
+    .feature h4{ margin:0; font-size:15px; }
+    .feature p{ margin:4px 0 0; color:var(--muted); font-size:13px; line-height:1.28; }
+
+    /* subtle footer */
+    footer{
+      margin-top:18px;
+      color:var(--muted);
+      font-size:13px;
+      text-align:center;
+      width:100%;
+    }
+
+    /* small decorative dot grid */
+    .dots{
+      position:absolute;
+      right:6%;
+      bottom:6%;
+      z-index:1;
+      opacity:0.08;
+      transform:rotate(6deg);
+    }
+
+    /* small focus styles */
+    a:focus, button:focus { outline: 3px solid rgba(125,185,181,0.25); outline-offset:3px; }
+
+  </style>
+</head>
+<body>
+  <div class="wrap" role="application" aria-labelledby="app-title">
+
+    <!-- Animated swirl background (SVG) -->
+    <svg class="background-svg" viewBox="0 0 1400 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <!-- soft layered swirls using gradients -->
+      <defs>
+        <linearGradient id="g1" x1="0" x2="1">
+          <stop offset="0%" stop-color="#dff6f3" />
+          <stop offset="100%" stop-color="#f0f9ff" />
+        </linearGradient>
+        <linearGradient id="g2" x1="0" x2="1">
+          <stop offset="0%" stop-color="#e8f3f2" />
+          <stop offset="100%" stop-color="#eef7fe" />
+        </linearGradient>
+        <filter id="blurIt" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="36" />
+        </filter>
+      </defs>
+
+      <!-- Big gentle swirl shapes -->
+      <g filter="url(#blurIt)">
+        <path d="M-200,200 C200,50 500,350 900,240 C1250,150 1400,50 1600,140 L1600,900 L-200,900 Z"
+              fill="url(#g1)" opacity="0.9" transform="rotate(-6 700 450)"/>
+        <path d="M-100,500 C180,680 520,520 820,620 C1060,700 1300,560 1700,580 L1700,1200 L-100,1200 Z"
+              fill="url(#g2)" opacity="0.85" transform="rotate(-12 700 450)"/>
+        <!-- smaller swirl overlay -->
+        <path d="M0,300 C160,180 420,190 680,280 C900,350 1180,300 1400,340 L1400,1000 L0,1000 Z"
+              fill="#f7fcfd" opacity="0.5" transform="rotate(4 700 450)"/>
+      </g>
+    </svg>
+
+    <main class="card" id="app" aria-live="polite">
+      <!-- Left: intro -->
+      <section aria-labelledby="app-title" style="padding-right:8px">
+        <div class="brand" role="img" aria-label="PositivePathways logo">
+          <div class="logo" aria-hidden="true">PP</div>
+          <div>
+            <h2 id="app-title" style="font-size:14px;margin:0;color:#0b3a3a">PositivePathways</h2>
+            <p style="margin-top:6px">gentle tools for everyday wellbeing</p>
+          </div>
+        </div>
+
+        <h1 class="lead">Small practices. Big calm.</h1>
+        <p class="sub">PositivePathways gives you guided breathing, short reflective exercises, and simple mood tracking to help you build a calmer daily rhythm — one gentle step at a time.</p>
+
+        <div class="actions" role="group" aria-label="Primary actions">
+          <button class="btn btn-primary" onclick="alert('Welcome to PositivePathways — this is a demo action.');" aria-label="Get Started">Get started</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'});" aria-label="See features">See features</button>
+        </div>
+
+        <p style="margin-top:18px;color:var(--muted);font-size:13px">Free guided sessions • Daily check-ins • Private & secure</p>
+      </section>
+
+      <!-- Right: feature panel -->
+      <aside class="panel" aria-labelledby="features-heading">
+        <h3 id="features-heading" style="margin:0 0 12px 0;font-size:16px;color:#083338;">What you'll find</h3>
+
+        <div id="features" aria-hidden="false">
+          <div class="feature">
+            <div class="icon" aria-hidden="true">🧘</div>
+            <div>
+              <h4>Short guided sessions</h4>
+              <p>Breathing and visualizations designed to settle your mind in 3–10 minutes.</p>
+            </div>
+          </div>
+
+          <div class="feature">
+            <div class="icon" aria-hidden="true">📈</div>
+            <div>
+              <h4>Daily mood tracking</h4>
+              <p>Quick, private check-ins that make your emotional patterns easy to notice over time.</p>
+            </div>
+          </div>
+
+          <div class="feature">
+            <div class="icon" aria-hidden="true">🔒</div>
+            <div>
+              <h4>Privacy-first</h4>
+              <p>Your data stays with you — options to export or delete at any time.</p>
+            </div>
+          </div>
+        </div>
+
+        <footer>
+          <div style="font-size:13px">Available on web and mobile • Built with care</div>
+        </footer>
+      </aside>
+
+      <!-- decorative dot grid -->
+      <svg class="dots" width="120" height="120" viewBox="0 0 24 24" aria-hidden="true">
+        <g fill="#072c2b">
+          <circle cx="2" cy="2" r="0.9"></circle>
+          <circle cx="8" cy="2" r="0.9"></circle>
+          <circle cx="14" cy="2" r="0.9"></circle>
+          <circle cx="20" cy="2" r="0.9"></circle>
+
+          <circle cx="2" cy="8" r="0.9"></circle>
+          <circle cx="8" cy="8" r="0.9"></circle>
+          <circle cx="14" cy="8" r="0.9"></circle>
+          <circle cx="20" cy="8" r="0.9"></circle>
+
+          <circle cx="2" cy="14" r="0.9"></circle>
+          <circle cx="8" cy="14" r="0.9"></circle>
+          <circle cx="14" cy="14" r="0.9"></circle>
+          <circle cx="20" cy="14" r="0.9"></circle>
+
+          <circle cx="2" cy="20" r="0.9"></circle>
+          <circle cx="8" cy="20" r="0.9"></circle>
+          <circle cx="14" cy="20" r="0.9"></circle>
+          <circle cx="20" cy="20" r="0.9"></circle>
+        </g>
+      </svg>
+    </main>
+  </div>
+
+  <!-- small script for accessibility + keyboard shortcut (G = Get started) -->
+  <script>
+    (function(){
+      // keyboard shortcut: press "g" for Get started (demo)
+      document.addEventListener('keydown', function(e){
+        if(e.key === 'g' || e.key === 'G'){
+          var btn = document.querySelector('.btn-primary');
+          if(btn){ btn.click(); }
+        }
+      });
+
+      // reduce motion preference respect
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)');
+      if(prefersReduced.matches){
+        document.querySelectorAll('.background-svg, .dots').forEach(el => {
+          el.style.transition = 'none';
+          el.style.animation = 'none';
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
