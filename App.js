@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text>Command S is save!!! The little dot says hey changes were made here. Mr. Grimes is the best!!!</Text>
+     <Text style={styles.welcomeText}>Welcome to PositivePathways</Text>
       <StatusBar style="auto" />
     </View>
   );
@@ -16,5 +16,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#2fa659ff',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  welcomeText: {
+    fontSize: 32,         // Bigger text
+    fontWeight: 'bold',   // Makes it bold
+    color: 'white',       // (optional) Makes text stand out more
+    textAlign: 'center',  // Centers multi-line text
   },
 });
