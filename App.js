@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 export default function App() {
   return (
     <View style={styles.container}>
-      <Text>Command S is save!!! The little dot says hey changes</Text>
+      <Text>Command S is save!!! The little dot says hey changes were made here.</Text>
       <StatusBar style="auto" />
     </View>
   );
