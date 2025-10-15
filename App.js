@@ -1,26 +1,20 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from "react";
+import { NavigationContainer } from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import WelcomeScreen from "./screens/WelcomeScreen";
+import FeelingScreen from "./screens/FeelingScreen";
+import GameScreen from "./screens/GameScreen";
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
-    <View style={styles.container}>
-     <Text style={styles.welcomeText}>Welcome to PositivePathways</Text>
-      <StatusBar style="auto" />
-    </View>
+    <NavigationContainer>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Welcome" component={WelcomeScreen} />
+        <Stack.Screen name="Feeling" component={FeelingScreen} />
+        <Stack.Screen name="Game" component={GameScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#2fa659ff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  welcomeText: {
-    fontSize: 32,         // Bigger text
-    fontWeight: 'bold',   // Makes it bold
-    color: 'white',       // (optional) Makes text stand out more
-    textAlign: 'center',  // Centers multi-line text
-  },
-});
