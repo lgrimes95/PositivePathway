@@ -1,6 +1,6 @@
-import React from "react";
-import { View, Text, StyleSheet } from "react-native";
-import GameButtons from "../components/GameButtons"; // 👈 import here
+import React, { useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import GameButtons from "../components/GameButtons"; // 👈 keep this
 
 export default function PatternPathwaysScreen({ navigation }) {
 const [pattern, setPattern] = useState(generatePattern());
