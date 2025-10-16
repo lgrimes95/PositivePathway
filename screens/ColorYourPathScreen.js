@@ -2,19 +2,36 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, FlatList, Dimensions } from "react-native";
 import GameButtons from "../components/GameButtons";
 
-const GRID_SIZE = 5; // 5x5 grid
+// Grid configuration
+const GRID_SIZE = 5;
 const TOTAL_CELLS = GRID_SIZE * GRID_SIZE;
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const CELL_SIZE = SCREEN_WIDTH / GRID_SIZE - 12;
 
+// Calming color palette
+const COLORS = [
+  "#A8DADC", // Light Teal
+  "#F4A261", // Soft Orange
+  "#E76F51", // Warm Coral
+  "#2A9D8F", // Deep Teal
+  "#E9C46A", // Muted Yellow
+  "#8ECAE6", // Soft Blue
+  "#B5E48C", // Light Green
+  "#FFDDD2", // Peach
+];
+
 export default function ColorYourPathScreen({ navigation }) {
-  const [filledCells, setFilledCells] = useState(Array(TOTAL_CELLS).fill(false));
+  const [cellColors, setCellColors] = useState(Array(TOTAL_CELLS).fill(null));
 
   const handlePress = (index) => {
-    setFilledCells((prev) => {
-      const newCells = [...prev];
-      newCells[index] = true;
-      return newCells;
+    setCellColors((prev) => {
+      const newColors = [...prev];
+      // Only set a color if not already set
+      if (!newColors[index]) {
+        const randomColor = COLORS[Math.floor(Math.random() * COLORS.length)];
+        newColors[index] = randomColor;
+      }
+      return newColors;
     });
   };
 
@@ -23,7 +40,11 @@ export default function ColorYourPathScreen({ navigation }) {
       key={index}
       style={[
         styles.cell,
-        { backgroundColor: filledCells[index] ? "#ffffffaa" : "#ffffff33" },
+        {
+          backgroundColor: cellColors[index]
+            ? cellColors[index]
+            : "#ffffff33", // Default light background
+        },
       ]}
       onPress={() => handlePress(index)}
     />
@@ -35,14 +56,13 @@ export default function ColorYourPathScreen({ navigation }) {
       <Text style={styles.subtitle}>Game for Anxiety</Text>
 
       <FlatList
-        data={filledCells}
+        data={cellColors}
         renderItem={renderCell}
         keyExtractor={(_, index) => index.toString()}
         numColumns={GRID_SIZE}
         contentContainerStyle={styles.grid}
       />
 
-      {/* Shared Buttons */}
       <GameButtons navigation={navigation} />
     </View>
   );
