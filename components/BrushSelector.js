@@ -16,4 +16,34 @@ export default function BrushSelector({ brushSize, setBrushSize }) {
           >
             <Text style={styles.text}>{s}</Text>
           </TouchableOpacity>
-       
+        ))}
+      </View>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  label: {
+    color: "#fff",
+    marginBottom: 6,
+    fontWeight: "bold",
+  },
+  row: {
+    flexDirection: "row",
+    marginBottom: 10,
+  },
+  button: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    backgroundColor: "#444",
+    borderRadius: 6,
+    marginRight: 10,
+  },
+  selected: {
+    backgroundColor: "#0077b6",
+  },
+  text: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+});
