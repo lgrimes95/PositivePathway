@@ -1,5 +1,13 @@
+// screens/FeelingScreen.js
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  Alert,
+} from "react-native";
 
 const feelingsMap = {
   Anxious: "Anxiety",
@@ -20,11 +28,9 @@ export default function FeelingScreen({ navigation }) {
   const [selected, setSelected] = useState([]);
 
   const toggleFeeling = (feeling) => {
-    if (selected.includes(feeling)) {
-      setSelected(selected.filter((item) => item !== feeling));
-    } else {
-      setSelected([...selected, feeling]);
-    }
+    setSelected((prev) =>
+      prev.includes(feeling) ? prev.filter((f) => f !== feeling) : [...prev, feeling]
+    );
   };
 
   const handleNext = () => {
@@ -32,26 +38,65 @@ export default function FeelingScreen({ navigation }) {
 
     // Count category selections
     const counts = { Anxiety: 0, Depression: 0, OCD: 0 };
-
     selected.forEach((f) => {
       const category = feelingsMap[f];
-      counts[category]++;
+      if (category && counts.hasOwnProperty(category)) {
+        counts[category]++;
+      } else {
+        console.warn(`No category mapping for feeling: "${f}"`);
+      }
     });
 
-    // Determine the dominant category
-    const topCategory = Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0];
+    // Debug logging — inspect these in Metro / device logs
+    console.log("Selected feelings:", selected);
+    console.log("Category counts:", counts);
 
-    // Map category to game name
+    // Determine winners
+    const maxCount = Math.max(...Object.values(counts));
+    const topCategories = Object.keys(counts).filter((k) => counts[k] === maxCount);
+
+    let topCategory = null;
+
+    if (topCategories.length === 1) {
+      topCategory = topCategories[0];
+    } else {
+      // Tie: use the category of the most recently selected feeling as tiebreaker
+      const lastSelected = selected[selected.length - 1];
+      topCategory = feelingsMap[lastSelected];
+
+      // If for some reason that mapping is undefined or not part of topCategories, pick first topCategory
+      if (!topCategory || !topCategories.includes(topCategory)) {
+        topCategory = topCategories[0];
+      }
+    }
+
+    // Map category to exact screen name registered in your navigator
     const gameMap = {
-      OCD: "PatternPathways",
-      Depression: "ActionPath",
-      Anxiety: "Color Your Path",
+      OCD: "PatternPathways",      // make sure this matches the screen name in App.js
+      Depression: "ActionPath",    // make sure this matches the screen name in App.js
+      Anxiety: "ColorYourPath",    // make sure this matches the screen name in App.js
     };
 
     const gameName = gameMap[topCategory];
 
-    // Navigate to the game screen and pass the name
-    navigation.navigate("Game", { gameName });
+    console.log("Top category:", topCategory, "-> gameName:", gameName);
+
+    if (!gameName) {
+      // Defensive fallback: show an error so you know something is wrong
+      Alert.alert(
+        "Navigation error",
+        `Couldn't determine which game to open. topCategory=${topCategory}`
+      );
+      return;
+    }
+
+    // Show an alert (so you see the chosen game) then navigate
+    Alert.alert("Selected Game", `Opening ${gameName}`, [
+      {
+        text: "OK",
+        onPress: () => navigation.navigate(gameName),
+      },
+    ]);
   };
 
   return (
@@ -59,25 +104,20 @@ export default function FeelingScreen({ navigation }) {
       <Text style={styles.question}>How are you feeling?</Text>
 
       <ScrollView contentContainerStyle={styles.feelingsContainer}>
-        {Object.keys(feelingsMap).map((feeling) => (
-          <TouchableOpacity
-            key={feeling}
-            style={[
-              styles.feelingButton,
-              selected.includes(feeling) && styles.selectedFeeling,
-            ]}
-            onPress={() => toggleFeeling(feeling)}
-          >
-            <Text
-              style={[
-                styles.feelingText,
-                selected.includes(feeling) && styles.selectedFeelingText,
-              ]}
+        {Object.keys(feelingsMap).map((feeling) => {
+          const isSelected = selected.includes(feeling);
+          return (
+            <TouchableOpacity
+              key={feeling}
+              style={[styles.feelingButton, isSelected && styles.selectedFeeling]}
+              onPress={() => toggleFeeling(feeling)}
             >
-              {feeling}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Text style={[styles.feelingText, isSelected && styles.selectedFeelingText]}>
+                {feeling}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
 
       <TouchableOpacity
