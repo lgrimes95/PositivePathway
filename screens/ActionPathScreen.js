@@ -1,110 +1,140 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+// screens/ActionPathScreen.js
+import React, { useState } from "react";
+import { SafeAreaView, View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import GameButtons from "../components/GameButtons";
 
-const actions = [
-  { name: "Go for a walk", points: 10 },
-  { name: "Call a friend", points: 8 },
-  { name: "Watch favorite show", points: 5 },
-  { name: "Stay in bed", points: -5 },
-  { name: "Scroll social media", points: -3 }
+const situations = [
+  {
+    situation: "You wake up feeling low and have no motivation.",
+    options: [
+      { text: "Stay in bed all morning", points: -2 },
+      { text: "Get up and take a shower", points: 2 },
+    ],
+  },
+  {
+    situation: "You have plans with a friend but don’t feel like going.",
+    options: [
+      { text: "Cancel and stay home", points: -3 },
+      { text: "Go anyway, maybe you’ll feel better", points: 3 },
+    ],
+  },
+  {
+    situation: "You’re overwhelmed by chores piling up.",
+    options: [
+      { text: "Do one small thing to start", points: 2 },
+      { text: "Avoid them completely", points: -2 },
+    ],
+  },
+  {
+    situation: "You’re feeling lonely this evening.",
+    options: [
+      { text: "Scroll social media", points: -1 },
+      { text: "Call or text someone you trust", points: 3 },
+    ],
+  },
 ];
 
-const DepressionGame = () => {
+const CONTENT_TOP_PADDING = "20%"; // <-- increase this number to push the content lower
+
+export default function ActionPathScreen({ navigation }) {
+  const [index, setIndex] = useState(0);
   const [score, setScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(30); // 30 seconds
-  const [currentAction, setCurrentAction] = useState({});
-  const [gameOver, setGameOver] = useState(false);
+  const [feedback, setFeedback] = useState("");
 
-  useEffect(() => {
-    pickAction();
+  const current = situations[index];
 
-    const timer = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          setGameOver(true);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
-
-  const pickAction = () => {
-    const action = actions[Math.floor(Math.random() * actions.length)];
-    setCurrentAction(action);
-  };
-
-  const chooseAction = (action) => {
-    setScore(prev => prev + action.points);
-    pickAction();
-  };
-
-  if (gameOver) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Game Over!</Text>
-        <Text style={styles.subtitle}>Your mood score: {score}</Text>
-      </View>
+  const handleChoice = (option) => {
+    setScore((s) => s + option.points);
+    setFeedback(
+      option.points > 0
+        ? "That was a positive step forward! 🌟"
+        : "That might not help your mood — try a different approach next time."
     );
-  }
+
+    setTimeout(() => {
+      if (index < situations.length - 1) {
+        setIndex((i) => i + 1);
+        setFeedback("");
+      } else {
+        setFeedback(`Game Over! Your mood score: ${score + option.points}`);
+      }
+    }, 1300);
+  };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.timer}>Time Left: {timeLeft}s</Text>
-      <Text style={styles.score}>Score: {score}</Text>
-      <Text style={styles.actionText}>Choose an action:</Text>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => chooseAction(currentAction)}
-      >
-        <Text style={styles.buttonText}>{currentAction.name}</Text>
-      </TouchableOpacity>
-    </View>
+    <SafeAreaView style={styles.safe}>
+      <View style={styles.container}>
+        {/* Centered question and options with extra top padding */}
+        <View style={[styles.content, { paddingTop: CONTENT_TOP_PADDING }]}>
+          <Text style={styles.situation}>{current.situation}</Text>
+
+          {current.options.map((option, i) => (
+            <TouchableOpacity
+              key={i}
+              style={styles.button}
+              onPress={() => handleChoice(option)}
+            >
+              <Text style={styles.buttonText}>{option.text}</Text>
+            </TouchableOpacity>
+          ))}
+
+          {feedback !== "" && <Text style={styles.feedback}>{feedback}</Text>}
+        </View>
+
+        {/* Navigation buttons pinned to bottom */}
+        <View style={styles.bottomButtons}>
+          <GameButtons navigation={navigation} />
+        </View>
+      </View>
+    </SafeAreaView>
   );
-};
+}
 
 const styles = StyleSheet.create({
+  safe: {
+    flex: 1,
+    backgroundColor: "#1b263b",
+  },
   container: {
-    flex:1,
-    justifyContent:'center',
-    alignItems:'center',
-    backgroundColor:'#f0f8ff',
-    padding:20
+    flex: 1,
+    backgroundColor: "#1b263b",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingBottom: 16,
   },
-  timer: {
-    fontSize:24,
-    fontWeight:'bold',
-    marginBottom:10
+  content: {
+    flex: 1,
+    alignItems: "center",
+    width: "100%",
   },
-  score: {
-    fontSize:20,
-    marginBottom:20
-  },
-  actionText: {
-    fontSize:18,
-    marginBottom:15
+  situation: {
+    fontSize: 22,
+    color: "white",
+    textAlign: "center",
+    marginBottom: 20,
+    paddingHorizontal: 10,
   },
   button: {
-    backgroundColor:'#4CAF50',
-    padding:15,
-    borderRadius:10,
-    marginVertical:10,
-    width:'80%',
-    alignItems:'center'
+    backgroundColor: "#415a77",
+    paddingVertical: 14,
+    borderRadius: 10,
+    marginVertical: 8,
+    width: "85%",
+    alignItems: "center",
   },
   buttonText: {
-    color:'white',
-    fontSize:18
+    color: "white",
+    fontSize: 18,
+    fontWeight: "500",
   },
-  title: {
-    fontSize:28,
-    fontWeight:'bold',
-    marginBottom:10
+  feedback: {
+    color: "#e0e1dd",
+    fontStyle: "italic",
+    marginTop: 20,
+    textAlign: "center",
   },
-  subtitle: {
-    fontSize:20
-  }
+  bottomButtons: {
+    alignItems: "center",
+    marginBottom: 8,
+  },
 });
