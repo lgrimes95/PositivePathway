@@ -47,42 +47,28 @@ export default function FeelingScreen({ navigation }) {
       }
     });
 
-    // Debug logging — inspect these in Metro / device logs
-    console.log("Selected feelings:", selected);
-    console.log("Category counts:", counts);
-
-    // Determine winners
+    // Determine top category
     const maxCount = Math.max(...Object.values(counts));
     const topCategories = Object.keys(counts).filter((k) => counts[k] === maxCount);
 
     let topCategory = null;
-
     if (topCategories.length === 1) {
       topCategory = topCategories[0];
     } else {
-      // Tie: use the category of the most recently selected feeling as tiebreaker
       const lastSelected = selected[selected.length - 1];
-      topCategory = feelingsMap[lastSelected];
-
-      // If for some reason that mapping is undefined or not part of topCategories, pick first topCategory
-      if (!topCategory || !topCategories.includes(topCategory)) {
-        topCategory = topCategories[0];
-      }
+      topCategory = feelingsMap[lastSelected] || topCategories[0];
     }
 
-    // Map category to exact screen name registered in your navigator
+    // Map category to screen name
     const gameMap = {
-      OCD: "PatternPathways",      // make sure this matches the screen name in App.js
-      Depression: "ActionPath",    // make sure this matches the screen name in App.js
-      Anxiety: "ColorYourPath",    // make sure this matches the screen name in App.js
+      OCD: "PatternPathways",
+      Depression: "ActionPath",
+      Anxiety: "ColorYourPath",
     };
 
     const gameName = gameMap[topCategory];
 
-    console.log("Top category:", topCategory, "-> gameName:", gameName);
-
     if (!gameName) {
-      // Defensive fallback: show an error so you know something is wrong
       Alert.alert(
         "Navigation error",
         `Couldn't determine which game to open. topCategory=${topCategory}`
@@ -90,7 +76,7 @@ export default function FeelingScreen({ navigation }) {
       return;
     }
 
-    // Show an alert (so you see the chosen game) then navigate
+    // Navigate to selected game
     Alert.alert("Selected Game", `Opening ${gameName}`, [
       {
         text: "OK",
@@ -103,7 +89,10 @@ export default function FeelingScreen({ navigation }) {
     <View style={styles.container}>
       <Text style={styles.question}>How are you feeling?</Text>
 
-      <ScrollView contentContainerStyle={styles.feelingsContainer}>
+      <ScrollView
+        contentContainerStyle={styles.feelingsContainer}
+        showsVerticalScrollIndicator={false}
+      >
         {Object.keys(feelingsMap).map((feeling) => {
           const isSelected = selected.includes(feeling);
           return (
@@ -112,7 +101,9 @@ export default function FeelingScreen({ navigation }) {
               style={[styles.feelingButton, isSelected && styles.selectedFeeling]}
               onPress={() => toggleFeeling(feeling)}
             >
-              <Text style={[styles.feelingText, isSelected && styles.selectedFeelingText]}>
+              <Text
+                style={[styles.feelingText, isSelected && styles.selectedFeelingText]}
+              >
                 {feeling}
               </Text>
             </TouchableOpacity>
@@ -136,17 +127,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#2fa659ff",
     alignItems: "center",
-    paddingTop: 100,
+    paddingTop: 80,
+    paddingHorizontal: 20,
   },
   question: {
     fontSize: 28,
     fontWeight: "bold",
     color: "white",
-    marginBottom: 30,
+    marginBottom: 20,
+    textAlign: "center",
   },
   feelingsContainer: {
+    flexGrow: 1,
     alignItems: "center",
-    paddingBottom: 100,
+    justifyContent: "center",
+    paddingBottom: 120, // space for the continue button
   },
   feelingButton: {
     borderWidth: 2,
@@ -154,7 +149,7 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     paddingVertical: 10,
     paddingHorizontal: 40,
-    marginVertical: 8,
+    marginVertical: 6,
   },
   selectedFeeling: {
     backgroundColor: "white",
@@ -174,6 +169,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 60,
     borderRadius: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 5,
   },
   nextText: {
     color: "#2fa659ff",
