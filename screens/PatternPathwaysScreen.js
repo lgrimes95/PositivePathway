@@ -6,8 +6,8 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient"; // 👈 Import LinearGradient
-import GameButtons from "../components/GameButtons"; // 👈 Keep this
+import { LinearGradient } from "expo-linear-gradient"; // 
+import GameButtons from "../components/GameButtons"; // 
 
 export default function PatternPathwaysScreen({ navigation }) {
   const [pattern, setPattern] = useState(generatePattern());
@@ -46,7 +46,7 @@ export default function PatternPathwaysScreen({ navigation }) {
 
   return (
     <LinearGradient
-      colors={["#4facfe", "#00f2fe"]} // 💡 Gradient colors
+      colors={["#4facfe", "#00f2fe"]} //
       style={styles.container}
     >
       <Text style={styles.title}>Pattern Pathways</Text>
