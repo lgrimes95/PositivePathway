@@ -1,14 +1,20 @@
 import React, { useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
-import GameButtons from "../components/GameButtons"; // 👈 keep this
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
+import { LinearGradient } from "expo-linear-gradient"; // 👈 Import LinearGradient
+import GameButtons from "../components/GameButtons"; // 👈 Keep this
 
 export default function PatternPathwaysScreen({ navigation }) {
-const [pattern, setPattern] = useState(generatePattern());
+  const [pattern, setPattern] = useState(generatePattern());
   const [userInput, setUserInput] = useState([]);
 
-
- function generatePattern(length = 4) {
-    const options = ['🔵', '🟢', '🔴'];
+  function generatePattern(length = 4) {
+    const options = ["🔵", "🟢", "🔴"];
     let result = [];
     for (let i = 0; i < length; i++) {
       result.push(options[Math.floor(Math.random() * options.length)]);
@@ -39,7 +45,10 @@ const [pattern, setPattern] = useState(generatePattern());
   };
 
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      colors={["#4facfe", "#00f2fe"]} // 💡 Gradient colors
+      style={styles.container}
+    >
       <Text style={styles.title}>Pattern Pathways</Text>
       <Text style={styles.subtitle}>Repeat the pattern:</Text>
 
@@ -54,7 +63,7 @@ const [pattern, setPattern] = useState(generatePattern());
       <Text style={styles.instruction}>Tap to match:</Text>
 
       <View style={styles.buttonRow}>
-        {['🔵', '🟢', '🔴'].map((color) => (
+        {["🔵", "🟢", "🔴"].map((color) => (
           <TouchableOpacity
             key={color}
             onPress={() => handleSelect(color)}
@@ -66,14 +75,13 @@ const [pattern, setPattern] = useState(generatePattern());
       </View>
 
       <GameButtons navigation={navigation} />
-    </View>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: {['#4facfe', '#00f2fe']}
     alignItems: "center",
     paddingTop: 60,
     paddingHorizontal: 20,
@@ -111,8 +119,14 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 10,
     marginHorizontal: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   choiceIcon: {
     fontSize: 24,
   },
 });
+   
