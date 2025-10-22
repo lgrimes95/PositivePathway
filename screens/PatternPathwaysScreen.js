@@ -1,129 +1,206 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
-import { LinearGradient } from "expo-linear-gradient"; 
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import GameButtons from "../components/GameButtons";
 
-export default function PatternPathwaysScreen({ navigation }) {
-  const [pattern, setPattern] = useState(generatePattern());
-  const [userInput, setUserInput] = useState([]);
+const COLORS = ["#FF6B6B", "#4ECDC4", "#FFD93D"]; // red, teal, yellow
 
-  function generatePattern(length = 4) {
-    const options = ["🔵", "🟢", "🔴"];
-    let result = [];
-    for (let i = 0; i < length; i++) {
-      result.push(options[Math.floor(Math.random() * options.length)]);
+// Generate a random color grid
+function generateTargetGrid(size = 3) {
+  const grid = [];
+  for (let i = 0; i < size; i++) {
+    const row = [];
+    for (let j = 0; j < size; j++) {
+      row.push(COLORS[Math.floor(Math.random() * COLORS.length)]);
     }
-    return result;
+    grid.push(row);
   }
+  return grid;
+}
 
-  const handleSelect = (color) => {
-    const updatedInput = [...userInput, color];
-    setUserInput(updatedInput);
+function cloneGrid(grid) {
+  return grid.map((row) => [...row]);
+}
 
-    if (updatedInput.length === pattern.length) {
-      if (JSON.stringify(updatedInput) === JSON.stringify(pattern)) {
-        Alert.alert("🎉 Great job!", "You matched the pattern!", [
-          { text: "Play Again", onPress: resetGame },
-        ]);
-      } else {
-        Alert.alert("❌ Try again", "That pattern was incorrect.", [
-          { text: "Try Again", onPress: resetGame },
-        ]);
-      }
-    }
+export default function PatternPathwaysScreen({ navigation }) {
+  const puzzles = [
+    { id: 1, size: 3 },
+    { id: 2, size: 4 },
+    { id: 3, size: 5 },
+  ];
+
+  const [currentPuzzleIndex, setCurrentPuzzleIndex] = useState(0);
+  const [targetGrid, setTargetGrid] = useState(
+    generateTargetGrid(puzzles[0].size)
+  );
+  const [playerGrid, setPlayerGrid] = useState(
+    Array(puzzles[0].size)
+      .fill(null)
+      .map(() => Array(puzzles[0].size).fill(COLORS[0]))
+  );
+
+  const handleTilePress = (row, col) => {
+    setPlayerGrid((prevGrid) => {
+      const newGrid = cloneGrid(prevGrid);
+      const currentColorIndex = COLORS.indexOf(newGrid[row][col]);
+      newGrid[row][col] = COLORS[(currentColorIndex + 1) % COLORS.length];
+      return newGrid;
+    });
   };
 
-  const resetGame = () => {
-    setPattern(generatePattern());
-    setUserInput([]);
+  const checkPuzzle = () => {
+    for (let i = 0; i < targetGrid.length; i++) {
+      for (let j = 0; j < targetGrid.length; j++) {
+        if (playerGrid[i][j] !== targetGrid[i][j]) return false;
+      }
+    }
+    return true;
+  };
+
+  const handleSubmit = () => {
+    if (checkPuzzle()) {
+      if (currentPuzzleIndex < puzzles.length - 1) {
+        Alert.alert("🎉 Great job!", "You solved the puzzle!", [
+          {
+            text: "Next Puzzle",
+            onPress: () => {
+              const nextIndex = currentPuzzleIndex + 1;
+              const nextSize = puzzles[nextIndex].size;
+              setCurrentPuzzleIndex(nextIndex);
+              setTargetGrid(generateTargetGrid(nextSize));
+              setPlayerGrid(
+                Array(nextSize)
+                  .fill(null)
+                  .map(() => Array(nextSize).fill(COLORS[0]))
+              );
+            },
+          },
+        ]);
+      } else {
+        Alert.alert(
+          "🏆 Amazing!",
+          "You completed all color puzzles!",
+          [
+            {
+              text: "Play Again",
+              onPress: () => {
+                setCurrentPuzzleIndex(0);
+                setTargetGrid(generateTargetGrid(puzzles[0].size));
+                setPlayerGrid(
+                  Array(puzzles[0].size)
+                    .fill(null)
+                    .map(() => Array(puzzles[0].size).fill(COLORS[0]))
+                );
+              },
+            },
+          ]
+        );
+      }
+    } else {
+      Alert.alert("❌ Not quite", "Try again!");
+    }
   };
 
   return (
-    <LinearGradient colors={["#4facfe", "#00f2fe"]} style={styles.container}>
+    <View style={styles.container}>
       <Text style={styles.title}>Pattern Pathways</Text>
-      <Text style={styles.subtitle}>Repeat the pattern:</Text>
+      <Text style={styles.instruction}>
+        Puzzle {currentPuzzleIndex + 1} of {puzzles.length}
+      </Text>
 
-      <View style={styles.patternRow}>
-        {pattern.map((icon, index) => (
-          <Text key={index} style={styles.patternIcon}>
-            {icon}
-          </Text>
+      <Text style={styles.instruction}>Match the target colors:</Text>
+
+      {/* Target Preview */}
+      <View style={styles.grid}>
+        {targetGrid.map((row, i) => (
+          <View key={i} style={styles.row}>
+            {row.map((color, j) => (
+              <View
+                key={j}
+                style={[styles.previewTile, { backgroundColor: color }]}
+              />
+            ))}
+          </View>
         ))}
       </View>
 
-      <Text style={styles.instruction}>Tap to match:</Text>
+      <Text style={styles.instruction}>Your grid:</Text>
 
-      <View style={styles.buttonRow}>
-        {["🔵", "🟢", "🔴"].map((color) => (
-          <TouchableOpacity
-            key={color}
-            onPress={() => handleSelect(color)}
-            style={styles.choiceButton}
-          >
-            <Text style={styles.choiceIcon}>{color}</Text>
-          </TouchableOpacity>
+      {/* Player Grid */}
+      <View style={styles.grid}>
+        {playerGrid.map((row, i) => (
+          <View key={i} style={styles.row}>
+            {row.map((color, j) => (
+              <TouchableOpacity
+                key={j}
+                style={[styles.tile, { backgroundColor: color }]}
+                onPress={() => handleTilePress(i, j)}
+              />
+            ))}
+          </View>
         ))}
       </View>
+
+      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+        <Text style={styles.submitText}>Check Puzzle</Text>
+      </TouchableOpacity>
 
       <GameButtons navigation={navigation} />
-    </LinearGradient>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
     paddingTop: 60,
     paddingHorizontal: 20,
+    alignItems: "center",
+    backgroundColor: "#2fa659ff",
   },
   title: {
-    color: "white",
     fontSize: 32,
+    color: "white",
     fontWeight: "bold",
     marginBottom: 10,
   },
-  subtitle: {
-    color: "white",
-    fontSize: 18,
-    marginBottom: 20,
-  },
-  patternRow: {
-    flexDirection: "row",
-    marginBottom: 20,
-  },
-  patternIcon: {
-    fontSize: 32,
-    marginHorizontal: 10,
-  },
   instruction: {
+    fontSize: 18,
     color: "white",
-    fontSize: 16,
     marginBottom: 10,
   },
-  buttonRow: {
+  grid: {
+    marginBottom: 20,
+  },
+  row: {
     flexDirection: "row",
-    marginBottom: 30,
+    justifyContent: "center",
   },
-  choiceButton: {
+  previewTile: {
+    width: 30,
+    height: 30,
+    margin: 3,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: "white",
+  },
+  tile: {
+    width: 60,
+    height: 60,
+    margin: 5,
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: "white",
+  },
+  submitButton: {
     backgroundColor: "white",
-    padding: 12,
-    borderRadius: 10,
-    marginHorizontal: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    paddingVertical: 12,
+    paddingHorizontal: 40,
+    borderRadius: 25,
+    marginBottom: 20,
   },
-  choiceIcon: {
-    fontSize: 24,
+  submitText: {
+    color: "#2fa659ff",
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
