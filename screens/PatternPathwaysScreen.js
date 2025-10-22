@@ -73,7 +73,7 @@ const [pattern, setPattern] = useState(generatePattern());
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#2fa659ff",
+    backgroundColor: {['#4facfe', '#00f2fe']}
     alignItems: "center",
     paddingTop: 60,
     paddingHorizontal: 20,
