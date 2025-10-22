@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Alert,
+  SafeAreaView,
 } from "react-native";
 
 const feelingsMap = {
@@ -29,27 +30,27 @@ export default function FeelingScreen({ navigation }) {
 
   const toggleFeeling = (feeling) => {
     setSelected((prev) =>
-      prev.includes(feeling) ? prev.filter((f) => f !== feeling) : [...prev, feeling]
+      prev.includes(feeling)
+        ? prev.filter((f) => f !== feeling)
+        : [...prev, feeling]
     );
   };
 
   const handleNext = () => {
     if (selected.length === 0) return;
 
-    // Count category selections
     const counts = { Anxiety: 0, Depression: 0, OCD: 0 };
     selected.forEach((f) => {
       const category = feelingsMap[f];
       if (category && counts.hasOwnProperty(category)) {
         counts[category]++;
-      } else {
-        console.warn(`No category mapping for feeling: "${f}"`);
       }
     });
 
-    // Determine top category
     const maxCount = Math.max(...Object.values(counts));
-    const topCategories = Object.keys(counts).filter((k) => counts[k] === maxCount);
+    const topCategories = Object.keys(counts).filter(
+      (k) => counts[k] === maxCount
+    );
 
     let topCategory = null;
     if (topCategories.length === 1) {
@@ -59,7 +60,6 @@ export default function FeelingScreen({ navigation }) {
       topCategory = feelingsMap[lastSelected] || topCategories[0];
     }
 
-    // Map category to screen name
     const gameMap = {
       OCD: "PatternPathways",
       Depression: "ActionPath",
@@ -76,7 +76,6 @@ export default function FeelingScreen({ navigation }) {
       return;
     }
 
-    // Navigate to selected game
     Alert.alert("Selected Game", `Opening ${gameName}`, [
       {
         text: "OK",
@@ -86,62 +85,76 @@ export default function FeelingScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.question}>How are you feeling?</Text>
+    <SafeAreaView style={styles.safeContainer}>
+      <View style={styles.container}>
+        <Text style={styles.question}>How are you feeling?</Text>
 
-      <ScrollView
-        contentContainerStyle={styles.feelingsContainer}
-        showsVerticalScrollIndicator={false}
-      >
-        {Object.keys(feelingsMap).map((feeling) => {
-          const isSelected = selected.includes(feeling);
-          return (
-            <TouchableOpacity
-              key={feeling}
-              style={[styles.feelingButton, isSelected && styles.selectedFeeling]}
-              onPress={() => toggleFeeling(feeling)}
-            >
-              <Text
-                style={[styles.feelingText, isSelected && styles.selectedFeelingText]}
+        <ScrollView
+          contentContainerStyle={styles.feelingsContainer}
+          showsVerticalScrollIndicator={false}
+        >
+          {Object.keys(feelingsMap).map((feeling) => {
+            const isSelected = selected.includes(feeling);
+            return (
+              <TouchableOpacity
+                key={feeling}
+                style={[
+                  styles.feelingButton,
+                  isSelected && styles.selectedFeeling,
+                ]}
+                onPress={() => toggleFeeling(feeling)}
               >
-                {feeling}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
+                <Text
+                  style={[
+                    styles.feelingText,
+                    isSelected && styles.selectedFeelingText,
+                  ]}
+                >
+                  {feeling}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
 
-      <TouchableOpacity
-        style={[styles.nextButton, { opacity: selected.length ? 1 : 0.5 }]}
-        onPress={handleNext}
-        disabled={selected.length === 0}
-      >
-        <Text style={styles.nextText}>Continue</Text>
-      </TouchableOpacity>
-    </View>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[
+              styles.nextButton,
+              { opacity: selected.length ? 1 : 0.5 },
+            ]}
+            onPress={handleNext}
+            disabled={selected.length === 0}
+          >
+            <Text style={styles.nextText}>Continue</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeContainer: {
+    flex: 1,
+    backgroundColor: "#2fa659ff",
+  },
   container: {
     flex: 1,
     backgroundColor: "#2fa659ff",
     alignItems: "center",
-    paddingTop: 80,
     paddingHorizontal: 20,
   },
   question: {
     fontSize: 28,
     fontWeight: "bold",
     color: "white",
-    marginBottom: 20,
+    marginVertical: 30,
     textAlign: "center",
   },
   feelingsContainer: {
-    flexGrow: 1,
     alignItems: "center",
-    justifyContent: "center",
-    paddingBottom: 120, // space for the continue button
+    paddingBottom: 60,
   },
   feelingButton: {
     borderWidth: 2,
@@ -162,9 +175,12 @@ const styles = StyleSheet.create({
     color: "#2fa659ff",
     fontWeight: "bold",
   },
+  buttonContainer: {
+    paddingVertical: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   nextButton: {
-    position: "absolute",
-    bottom: 50,
     backgroundColor: "white",
     paddingVertical: 12,
     paddingHorizontal: 60,

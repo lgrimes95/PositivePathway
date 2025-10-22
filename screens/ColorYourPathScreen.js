@@ -1,68 +1,83 @@
-import React, { useEffect, useRef, useState } from "react";
-import { View, Text, Animated, StyleSheet, TouchableOpacity } from "react-native";
+// screens/MoodGarden.js
+import React, { useState } from "react";
+import {
+  View,
+  StyleSheet,
+  TouchableWithoutFeedback,
+  Animated,
+  Text,
+  TouchableOpacity,
+  Dimensions,
+} from "react-native";
 
-export default function ColorYourPathScreen({ navigation }) {
-  const [phase, setPhase] = useState("Inhale");
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-  const fadeAnim = useRef(new Animated.Value(0.8)).current;
+const { width, height } = Dimensions.get("window");
 
-  useEffect(() => {
-    const cycle = () => {
-      setPhase("Inhale");
-      Animated.parallel([
-        Animated.timing(scaleAnim, {
-          toValue: 1.8,
-          duration: 4000,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 4000,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        setPhase("Hold");
-        setTimeout(() => {
-          setPhase("Exhale");
-          Animated.parallel([
-            Animated.timing(scaleAnim, {
-              toValue: 1,
-              duration: 4000,
-              useNativeDriver: true,
-            }),
-            Animated.timing(fadeAnim, {
-              toValue: 0.6,
-              duration: 4000,
-              useNativeDriver: true,
-            }),
-          ]).start(() => cycle());
-        }, 2000);
-      });
-    };
-    cycle();
-  }, []);
+export default function MoodGarden({ navigation, route }) {
+  const [flowers, setFlowers] = useState([]);
+
+  const colors = [
+    "#FF9AA2", // soft pink
+    "#FFB7B2", // peach
+    "#FFDAC1", // light orange
+    "#E2F0CB", // green
+    "#B5EAD7", // teal
+    "#C7CEEA", // lavender
+  ];
+
+  const addFlower = (x, y) => {
+    const color = colors[Math.floor(Math.random() * colors.length)];
+    const scale = new Animated.Value(0);
+
+    const newFlower = { x, y, color, scale };
+    setFlowers((prev) => [...prev, newFlower]);
+
+    Animated.spring(scale, {
+      toValue: 1,
+      friction: 4,
+      tension: 60,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePress = (e) => {
+    const { locationX, locationY } = e.nativeEvent;
+    addFlower(locationX, locationY);
+  };
+
+  const clearGarden = () => {
+    setFlowers([]);
+  };
 
   return (
     <View style={styles.container}>
-      <Animated.View
-        style={[
-          styles.circle,
-          {
-            transform: [{ scale: scaleAnim }],
-            opacity: fadeAnim,
-          },
-        ]}
-      />
-      <Text style={styles.phaseText}>{phase}</Text>
+      <TouchableWithoutFeedback onPress={handlePress}>
+        <View style={styles.gardenArea}>
+          {flowers.map((f, index) => (
+            <Animated.View
+              key={index}
+              style={[
+                styles.flower,
+                {
+                  backgroundColor: f.color,
+                  left: f.x - 15,
+                  top: f.y - 15,
+                  transform: [{ scale: f.scale }],
+                },
+              ]}
+            />
+          ))}
+          {flowers.length === 0 && (
+            <Text style={styles.instruction}>
+              Tap anywhere to plant your mood 🌱
+            </Text>
+          )}
+        </View>
+      </TouchableWithoutFeedback>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate("Feeling")}
-        >
-          <Text style={styles.buttonText}>Back to Feelings</Text>
+        <TouchableOpacity style={styles.button} onPress={clearGarden}>
+          <Text style={styles.buttonText}>Clear Garden</Text>
         </TouchableOpacity>
-
         <TouchableOpacity
           style={styles.button}
           onPress={() => navigation.navigate("Welcome")}
@@ -77,38 +92,50 @@ export default function ColorYourPathScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#E6F0FA",
-    justifyContent: "center",
+    backgroundColor: "#A7E9AF",
     alignItems: "center",
+    justifyContent: "center",
   },
-  circle: {
-    width: 150,
-    height: 150,
-    backgroundColor: "#76C7C0",
-    borderRadius: 100,
+  gardenArea: {
+    flex: 1,
+    width: "100%",
+    position: "relative",
   },
-  phaseText: {
-    fontSize: 28,
+  flower: {
+    position: "absolute",
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+  },
+  instruction: {
+    position: "absolute",
+    top: height / 2.5,
+    width: "100%",
+    textAlign: "center",
+    fontSize: 20,
+    color: "white",
     fontWeight: "600",
-    marginTop: 50,
-    color: "#333",
   },
   buttonContainer: {
-    position: "absolute",
-    bottom: 60,
-    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "100%",
+    paddingVertical: 20,
+    backgroundColor: "rgba(255,255,255,0.3)",
   },
   button: {
-    borderWidth: 2,
-    borderColor: "#76C7C0",
+    backgroundColor: "white",
     borderRadius: 25,
     paddingVertical: 10,
-    paddingHorizontal: 40,
-    marginVertical: 10,
+    paddingHorizontal: 25,
   },
   buttonText: {
-    color: "#333",
-    fontSize: 18,
+    color: "#2fa659",
     fontWeight: "bold",
+    fontSize: 16,
   },
 });
