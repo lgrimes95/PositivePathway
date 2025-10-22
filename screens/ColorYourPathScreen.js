@@ -1,90 +1,69 @@
-// screens/MoodGarden.js
+// screens/ColorYourPathScreen.js
 import React, { useState } from "react";
-import {
-  View,
-  StyleSheet,
-  TouchableWithoutFeedback,
-  Animated,
-  Text,
-  TouchableOpacity,
-  Dimensions,
-} from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, PanResponder } from "react-native";
+import Svg, { Path } from "react-native-svg";
+import GameButtons from "../components/GameButtons";
 
-const { width, height } = Dimensions.get("window");
+const COLORS = ["#FF6B6B", "#4ECDC4", "#FFD93D", "#6A4C93", "#FF9F1C"];
 
-export default function MoodGarden({ navigation, route }) {
-  const [flowers, setFlowers] = useState([]);
+export default function ColorYourPathScreen({ navigation }) {
+  const [paths, setPaths] = useState([]);
+  const [currentPath, setCurrentPath] = useState("");
+  const [color, setColor] = useState(COLORS[0]);
 
-  const colors = [
-    "#FF9AA2", // soft pink
-    "#FFB7B2", // peach
-    "#FFDAC1", // light orange
-    "#E2F0CB", // green
-    "#B5EAD7", // teal
-    "#C7CEEA", // lavender
-  ];
+  const panResponder = PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onPanResponderGrant: (evt) => {
+      const { locationX, locationY } = evt.nativeEvent;
+      setCurrentPath(`M${locationX},${locationY}`);
+    },
+    onPanResponderMove: (evt) => {
+      const { locationX, locationY } = evt.nativeEvent;
+      setCurrentPath((prev) => prev + ` L${locationX},${locationY}`);
+    },
+    onPanResponderRelease: () => {
+      setPaths((prev) => [...prev, { d: currentPath, color }]);
+      setCurrentPath("");
+    },
+  });
 
-  const addFlower = (x, y) => {
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    const scale = new Animated.Value(0);
-
-    const newFlower = { x, y, color, scale };
-    setFlowers((prev) => [...prev, newFlower]);
-
-    Animated.spring(scale, {
-      toValue: 1,
-      friction: 4,
-      tension: 60,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const handlePress = (e) => {
-    const { locationX, locationY } = e.nativeEvent;
-    addFlower(locationX, locationY);
-  };
-
-  const clearGarden = () => {
-    setFlowers([]);
+  const handleClear = () => {
+    setPaths([]);
+    setCurrentPath("");
   };
 
   return (
     <View style={styles.container}>
-      <TouchableWithoutFeedback onPress={handlePress}>
-        <View style={styles.gardenArea}>
-          {flowers.map((f, index) => (
-            <Animated.View
-              key={index}
-              style={[
-                styles.flower,
-                {
-                  backgroundColor: f.color,
-                  left: f.x - 15,
-                  top: f.y - 15,
-                  transform: [{ scale: f.scale }],
-                },
-              ]}
-            />
-          ))}
-          {flowers.length === 0 && (
-            <Text style={styles.instruction}>
-              Tap anywhere to plant your mood 🌱
-            </Text>
-          )}
-        </View>
-      </TouchableWithoutFeedback>
+      <Text style={styles.title}>Color Your Path</Text>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button} onPress={clearGarden}>
-          <Text style={styles.buttonText}>Clear Garden</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate("Welcome")}
-        >
-          <Text style={styles.buttonText}>Home</Text>
+      {/* Color Palette */}
+      <View style={styles.palette}>
+        {COLORS.map((c) => (
+          <TouchableOpacity
+            key={c}
+            style={[styles.colorButton, { backgroundColor: c, borderWidth: color === c ? 3 : 0 }]}
+            onPress={() => setColor(c)}
+          />
+        ))}
+      </View>
+
+      {/* Drawing Area */}
+      <View style={styles.canvas} {...panResponder.panHandlers}>
+        <Svg style={{ flex: 1 }}>
+          {paths.map((p, i) => (
+            <Path key={i} d={p.d} stroke={p.color} strokeWidth={6} fill="none" strokeLinecap="round" />
+          ))}
+          {currentPath ? <Path d={currentPath} stroke={color} strokeWidth={6} fill="none" strokeLinecap="round" /> : null}
+        </Svg>
+      </View>
+
+      <View style={styles.buttonsRow}>
+        <TouchableOpacity style={styles.clearButton} onPress={handleClear}>
+          <Text style={styles.buttonText}>Clear</Text>
         </TouchableOpacity>
       </View>
+
+      <GameButtons navigation={navigation} />
     </View>
   );
 }
@@ -92,49 +71,46 @@ export default function MoodGarden({ navigation, route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#A7E9AF",
+    paddingTop: 60,
     alignItems: "center",
-    justifyContent: "center",
+    backgroundColor: "#2fa659ff",
   },
-  gardenArea: {
+  title: {
+    fontSize: 32,
+    color: "white",
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  palette: {
+    flexDirection: "row",
+    marginBottom: 10,
+  },
+  colorButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginHorizontal: 5,
+  },
+  canvas: {
     flex: 1,
     width: "100%",
-    position: "relative",
-  },
-  flower: {
-    position: "absolute",
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-  },
-  instruction: {
-    position: "absolute",
-    top: height / 2.5,
-    width: "100%",
-    textAlign: "center",
-    fontSize: 20,
-    color: "white",
-    fontWeight: "600",
-  },
-  buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    width: "100%",
-    paddingVertical: 20,
-    backgroundColor: "rgba(255,255,255,0.3)",
-  },
-  button: {
     backgroundColor: "white",
-    borderRadius: 25,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  buttonsRow: {
+    flexDirection: "row",
+    marginBottom: 20,
+  },
+  clearButton: {
+    backgroundColor: "white",
     paddingVertical: 10,
     paddingHorizontal: 25,
+    borderRadius: 25,
+    marginHorizontal: 5,
   },
   buttonText: {
-    color: "#2fa659",
+    color: "#2fa659ff",
     fontWeight: "bold",
     fontSize: 16,
   },

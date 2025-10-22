@@ -8,6 +8,7 @@ import {
   ScrollView,
   Alert,
   SafeAreaView,
+  Platform,
 } from "react-native";
 
 const feelingsMap = {
@@ -39,6 +40,7 @@ export default function FeelingScreen({ navigation }) {
   const handleNext = () => {
     if (selected.length === 0) return;
 
+    // Count category selections
     const counts = { Anxiety: 0, Depression: 0, OCD: 0 };
     selected.forEach((f) => {
       const category = feelingsMap[f];
@@ -47,6 +49,7 @@ export default function FeelingScreen({ navigation }) {
       }
     });
 
+    // Determine top category
     const maxCount = Math.max(...Object.values(counts));
     const topCategories = Object.keys(counts).filter(
       (k) => counts[k] === maxCount
@@ -60,6 +63,7 @@ export default function FeelingScreen({ navigation }) {
       topCategory = feelingsMap[lastSelected] || topCategories[0];
     }
 
+    // Map category to screen name
     const gameMap = {
       OCD: "PatternPathways",
       Depression: "ActionPath",
@@ -76,12 +80,17 @@ export default function FeelingScreen({ navigation }) {
       return;
     }
 
-    Alert.alert("Selected Game", `Opening ${gameName}`, [
-      {
-        text: "OK",
-        onPress: () => navigation.navigate(gameName),
-      },
-    ]);
+    // Navigate differently for web vs mobile
+    if (Platform.OS === "web") {
+      navigation.navigate(gameName);
+    } else {
+      Alert.alert("Selected Game", `Opening ${gameName}`, [
+        {
+          text: "OK",
+          onPress: () => navigation.navigate(gameName),
+        },
+      ]);
+    }
   };
 
   return (
