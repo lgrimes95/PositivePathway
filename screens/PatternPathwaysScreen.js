@@ -77,7 +77,7 @@ export default function PatternPathwaysScreen({ navigation }) {
         ]);
       } else {
         Alert.alert(
-          "🏆 Amazing!",
+          "Amazing!",
           "You completed all color puzzles!",
           [
             {
@@ -96,7 +96,7 @@ export default function PatternPathwaysScreen({ navigation }) {
         );
       }
     } else {
-      Alert.alert("❌ Not quite", "Try again!");
+      Alert.alert("Not quite", "Try again!");
     }
   };
 
